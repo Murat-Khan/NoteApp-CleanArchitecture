@@ -1,13 +1,16 @@
 package com.murat.noteapp_cleanarchitecture.domain.repository
 
 import com.murat.noteapp_cleanarchitecture.domain.model.Note
+import com.murat.noteapp_cleanarchitecture.domain.utils.Resource
+import kotlinx.coroutines.flow.Flow
 
 interface NoteRepository {
-    fun addNote(note: Note)
 
-    fun editNote(note: Note)
+    fun addNote(note: Note):Flow<Resource<Unit>>
 
-    fun getAllNotes() : List<Note>
+    fun editNote(note: Note):Flow<Resource<Unit>>
 
-    fun removeNote(note: Note)
+    fun getAllNotes() : Flow<Resource<List<Note>>>
+
+    fun removeNote(note: Note):Flow<Resource<Unit>>
 }
