@@ -22,17 +22,17 @@ object NoteModule {
     @Provides
     fun provideNoteDatabase(
         @ApplicationContext context: Context
-    ) = Room.databaseBuilder(
+    ): NoteDatabase = Room.databaseBuilder(
         context,
         NoteDatabase::class.java,
         "note_db"
-    ).allowMainThreadQueries()
+    ).allowMainThreadQueries().build()
 
     @Singleton
     @Provides
-    fun provideNoteDao(noteDatabase: NoteDatabase)=noteDatabase.noteDao()
+    fun provideNoteDao(noteDatabase: NoteDatabase) = noteDatabase.noteDao()
 
-    @Singleton
+
     @Provides
     fun provideRepository(noteDao: NoteDao) : NoteRepository= NoteRepositoryImpl(noteDao)
 }

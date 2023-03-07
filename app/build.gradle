@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace 'com.murat.noteapp_cleanarchitecture'
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.murat.noteapp_cleanarchitecture"
@@ -32,6 +32,9 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    buildFeatures{
+        viewBinding true
+    }
 }
 
 dependencies {
@@ -44,16 +47,25 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
+    implementation "androidx.fragment:fragment-ktx:1.5.5"
+
     //Room
     def room_version = "2.5.0"
     implementation "androidx.room:room-runtime:$room_version"
-    annotationProcessor "androidx.room:room-compiler:$room_version"
-    kapt "androidx.room:room-ktx:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
 
     //Hilt
     def hilt_dagger_version = "2.44.2"
     implementation "com.google.dagger:hilt-android:$hilt_dagger_version"
     kapt "com.google.dagger:hilt-compiler:$hilt_dagger_version"
 
+    // navComp
+    def nav_version = "2.5.3"
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
+
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
+
+
 }
