@@ -9,33 +9,35 @@ import com.murat.noteapp_cleanarchitecture.domain.model.Note
 import java.util.*
 import kotlin.collections.List
 
-class NoteAdapter:RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
+class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
 
     private var noteList = arrayListOf<Note>()
 
-     fun addNote(note: List<Note>){
-         noteList.clear()
+    fun addNote(note: List<Note>) {
+        noteList.clear()
         noteList.addAll(note)
         notifyDataSetChanged()
 
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
-      return NoteViewHolder(
-          NoteItemBinding.inflate(
-              LayoutInflater.from(parent.context)
-              ,parent,false))
+        return NoteViewHolder(
+            NoteItemBinding.inflate(
+                LayoutInflater.from(parent.context), parent, false
+            )
+        )
     }
 
     override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
-       holder.onBind(noteList[position])
+        holder.onBind(noteList[position])
     }
 
     override fun getItemCount(): Int {
-       return noteList.size
+        return noteList.size
     }
 
-    class NoteViewHolder(private val binding: NoteItemBinding):RecyclerView.ViewHolder(binding.root) {
+    class NoteViewHolder(private val binding: NoteItemBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         fun onBind(note: Note) {
             binding.tvNoteTitle.text = note.title
             binding.tvDescription.text = note.description
@@ -50,4 +52,7 @@ class NoteAdapter:RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
         }
 
     }
+
+    //interface OnclickListener(){}
+
 }
