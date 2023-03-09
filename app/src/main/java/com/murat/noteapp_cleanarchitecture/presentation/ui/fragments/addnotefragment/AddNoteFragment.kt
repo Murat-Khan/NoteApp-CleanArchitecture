@@ -26,14 +26,15 @@ class AddNoteFragment : BaseFragment(R.layout.fragment_add_note) {
         super.initClickListeners()
         viewBinding.btnSave.setOnClickListener {
             if (viewBinding.etNoteDesc.text.isEmpty() || viewBinding.etNoteTitle.text.isEmpty()) {
-
                 requireActivity().showToast("заполните поля")
-
-            } else {
+            }else if (note == null) {
                 createNote()
-            }
+
+            }else {editNote()}
+
         }
     }
+
 
     private fun createNote() {
         viewModel.addNote(
@@ -56,19 +57,17 @@ class AddNoteFragment : BaseFragment(R.layout.fragment_add_note) {
 
             }
         )
-
-        viewModel.editNote.collectUIState(
+        viewModel.editNoteState.collectUIState(
             uiState = {
                 viewBinding.progressBar.isVisible = it is UIState.Loading
             },
 
             onSuccess = {
-                editNote()
+
                 findNavController().navigateUp()
+
             }
         )
-
-
     }
 
     override fun initialize() {
@@ -77,28 +76,28 @@ class AddNoteFragment : BaseFragment(R.layout.fragment_add_note) {
     }
 
     private fun getData() {
-
         arguments?.let {
             val value = it.getSerializable("edit_note")
             if (value != null) {
                 note = value as Note
             }
         }
-            viewBinding.etNoteDesc.setText(note?.description)
-            viewBinding.etNoteTitle.setText(note?.title)
-            viewBinding.btnSave.text = "Update"
-        }
-
-        private fun editNote() {
-
-            viewModel.editNote(
-                Note(
-                    title = viewBinding.etNoteTitle.text.toString(),
-                    description = viewBinding.etNoteDesc.text.toString()
-
-                )
-            )
-        }
-
-
+        viewBinding.etNoteDesc.setText(note?.description)
+        viewBinding.etNoteTitle.setText(note?.title)
+        viewBinding.btnSave.text = "Update"
     }
+
+    private fun editNote() {
+
+        viewModel.editNote(
+            Note(
+                id = note!!.id,
+                title = viewBinding.etNoteTitle.text.toString(),
+                description = viewBinding.etNoteDesc.text.toString()
+
+            )
+        )
+    }
+
+
+}

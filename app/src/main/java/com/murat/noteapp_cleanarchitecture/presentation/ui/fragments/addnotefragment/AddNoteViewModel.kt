@@ -23,7 +23,7 @@ class AddNoteViewModel@Inject constructor(
     val addNoteState = _addNoteState.asStateFlow()
 
     private val _editNoteState = MutableStateFlow<UIState<Unit>>(UIState.Empty())
-    val editNote = _editNoteState.asStateFlow()
+    val editNoteState = _editNoteState.asStateFlow()
 
     fun addNote(note: Note) {
         addNoteUseCase(note).collectFlow(_addNoteState)

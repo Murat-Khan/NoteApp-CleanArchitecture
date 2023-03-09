@@ -13,6 +13,7 @@ class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
 
     private var noteList = arrayListOf<Note>()
     private lateinit var listener: OnclickListener
+    private lateinit var onLongListener: OnLongClickListener
 
     fun addNote(note: List<Note>) {
         noteList.clear()
@@ -23,6 +24,9 @@ class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
 
     fun setListener(onItemClick: OnclickListener) {
         listener = onItemClick
+    }
+    fun setLongListener(listenerLong: OnLongClickListener){
+        onLongListener = listenerLong
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
@@ -51,6 +55,11 @@ class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
                 listener.onItemClick(note)
             }
 
+            itemView.setOnLongClickListener {
+                onLongListener.onItemLongClick(note)
+                true
+            }
+
             val random = Random()
             val color =
                 Color.argb(
@@ -62,9 +71,10 @@ class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
 
     }
     interface OnclickListener{
-
         fun onItemClick(note: Note)
-
+    }
+    interface OnLongClickListener{
+        fun onItemLongClick(note: Note)
     }
 
 }

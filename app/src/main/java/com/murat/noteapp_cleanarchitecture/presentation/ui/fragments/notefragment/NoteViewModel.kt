@@ -24,7 +24,7 @@ class NoteViewModel @Inject constructor(
 
 
     private val _removeNoteState = MutableStateFlow<UIState<Unit>>(UIState.Empty())
-    val removeNote = _removeNoteState.asStateFlow()
+    val removeNoteState = _removeNoteState.asStateFlow()
 
     fun getAllNotes() {
         getAllNotesUseCase().collectFlow(_getAllNotesState)
@@ -33,6 +33,6 @@ class NoteViewModel @Inject constructor(
 
 
     fun removeNote(note: Note){
-        removeNoteUseCase.removeNote(note)
+        removeNoteUseCase.removeNote(note).collectFlow(_removeNoteState)
     }
 }

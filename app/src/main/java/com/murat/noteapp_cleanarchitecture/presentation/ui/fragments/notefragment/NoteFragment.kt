@@ -13,11 +13,13 @@ import com.murat.noteapp_cleanarchitecture.databinding.FragmentNoteBinding
 import com.murat.noteapp_cleanarchitecture.domain.model.Note
 import com.murat.noteapp_cleanarchitecture.presentation.base.BaseFragment
 import com.murat.noteapp_cleanarchitecture.presentation.utils.UIState
+import com.murat.noteapp_cleanarchitecture.presentation.utils.showConfirmationDialog
 import dagger.hilt.android.AndroidEntryPoint
 
 
 @AndroidEntryPoint
-class NoteFragment: BaseFragment(R.layout.fragment_note),NoteAdapter.OnclickListener {
+class NoteFragment : BaseFragment(R.layout.fragment_note), NoteAdapter.OnclickListener,
+    NoteAdapter.OnLongClickListener {
 
     private var noteAdapter = NoteAdapter()
     private val viewBinding by viewBinding(FragmentNoteBinding::bind)
@@ -27,15 +29,24 @@ class NoteFragment: BaseFragment(R.layout.fragment_note),NoteAdapter.OnclickList
     override fun setupSubscribers() {
 
         viewModel.getAllNotesState.collectUIState(
-           uiState = {
-             viewBinding.progress.isVisible = it is UIState.Loading
-           },
+            uiState = {
+                viewBinding.progress.isVisible = it is UIState.Loading
+            },
 
-            onSuccess = {data->
+            onSuccess = { data ->
                 noteAdapter.addNote(data)
             }
         )
 
+        viewModel.removeNoteState.collectUIState(
+            uiState = {
+                viewBinding.progress.isVisible = it is UIState.Loading
+            },
+
+            onSuccess = {
+                noteAdapter.notifyDataSetChanged()
+            }
+        )
     }
 
     override fun setupRequest() {
@@ -49,8 +60,7 @@ class NoteFragment: BaseFragment(R.layout.fragment_note),NoteAdapter.OnclickList
             .setEnterAnim(R.anim.slide_in_right)
             .build()
         viewBinding.fabAddNote.setOnClickListener {
-            findNavController().navigate(R.id.addNoteFragment,null,options)
-
+            findNavController().navigate(R.id.addNoteFragment, null, options)
         }
     }
 
@@ -59,9 +69,10 @@ class NoteFragment: BaseFragment(R.layout.fragment_note),NoteAdapter.OnclickList
         super.initialize()
         setupRecyclerView()
         noteAdapter.setListener(this)
-     }
+        noteAdapter.setLongListener(this)
+    }
 
-    private fun setupRecyclerView(){
+    private fun setupRecyclerView() {
         viewBinding.recyclerView.apply {
             layoutManager = StaggeredGridLayoutManager(
                 2,
@@ -74,5 +85,17 @@ class NoteFragment: BaseFragment(R.layout.fragment_note),NoteAdapter.OnclickList
 
     override fun onItemClick(note: Note) {
         findNavController().navigate(R.id.addNoteFragment, bundleOf("edit_note" to note))
+    }
+
+
+    override fun onItemLongClick(note: Note) {
+        requireActivity().showConfirmationDialog(
+            title = "Удаление",
+            message = "Вы уверены, что хотите удалитьзаметку?",
+            positiveButtonText = "Удалить",
+            negativeButtonText = "Отмена",
+            onPositiveAction = { viewModel.removeNote(note) },
+            onNegativeAction = { }
+        )
     }
 }
