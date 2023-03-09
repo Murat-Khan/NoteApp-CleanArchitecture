@@ -1,87 +1,67 @@
 package com.murat.noteapp_cleanarchitecture.presentation.ui.fragments.notefragment
 
-import android.os.Bundle
-import android.provider.ContactsContract.CommonDataKinds.Note
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Toast
+
+import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import by.kirich1409.viewbindingdelegate.viewBinding
 import com.murat.noteapp_cleanarchitecture.R
-import com.murat.noteapp_cleanarchitecture.data.model.NoteEntity
-
 import com.murat.noteapp_cleanarchitecture.databinding.FragmentNoteBinding
+import com.murat.noteapp_cleanarchitecture.domain.model.Note
+import com.murat.noteapp_cleanarchitecture.presentation.base.BaseFragment
 import com.murat.noteapp_cleanarchitecture.presentation.utils.UIState
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
+
 
 @AndroidEntryPoint
-class NoteFragment : Fragment() {
+class NoteFragment: BaseFragment(R.layout.fragment_note),NoteAdapter.OnclickListener {
 
     private var noteAdapter = NoteAdapter()
-    private lateinit var viewBinding: FragmentNoteBinding
+    private val viewBinding by viewBinding(FragmentNoteBinding::bind)
     private val viewModel: NoteViewModel by viewModels()
-    private var note: ArrayList <Note>? = null
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        viewBinding = FragmentNoteBinding.inflate(inflater, container, false)
-        return viewBinding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        setupSubscribes()
-        setupRequests()
-        initClicker()
-        setUpRecyclerView()
-    }
-
-    private fun setupSubscribes() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.getAllNotesState.collect { state ->
-                    when (state) {
-                        is UIState.Empty -> {}
-                        is UIState.Error -> {
-                            Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT)
-                                .show()
-                        }
-                        is UIState.Loading -> {
-                            // TODO show progress bar
-                        }
-                        is UIState.Success -> {
-
-                            noteAdapter.addNote(state.data)
 
 
-                        }
-                    }
-                }
+    override fun setupSubscribers() {
+
+        viewModel.getAllNotesState.collectUIState(
+           uiState = {
+             viewBinding.progress.isVisible = it is UIState.Loading
+           },
+
+            onSuccess = {data->
+                noteAdapter.addNote(data)
             }
-        }
+        )
+
     }
 
-    private fun setupRequests() {
+    override fun setupRequest() {
         viewModel.getAllNotes()
     }
 
-    private fun initClicker() {
+    override fun initClickListeners() {
+        super.initClickListeners()
+
+        val options = NavOptions.Builder()
+            .setEnterAnim(R.anim.slide_in_right)
+            .build()
         viewBinding.fabAddNote.setOnClickListener {
-            findNavController().navigate(R.id.addNoteFragment)
+            findNavController().navigate(R.id.addNoteFragment,null,options)
+
         }
     }
 
-    private fun setUpRecyclerView() {
+
+    override fun initialize() {
+        super.initialize()
+        setupRecyclerView()
+        noteAdapter.setListener(this)
+     }
+
+    private fun setupRecyclerView(){
         viewBinding.recyclerView.apply {
             layoutManager = StaggeredGridLayoutManager(
                 2,
@@ -92,5 +72,7 @@ class NoteFragment : Fragment() {
         }
     }
 
-
+    override fun onItemClick(note: Note) {
+        findNavController().navigate(R.id.addNoteFragment, bundleOf("edit_note" to note))
+    }
 }

@@ -12,12 +12,17 @@ import kotlin.collections.List
 class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
 
     private var noteList = arrayListOf<Note>()
+    private lateinit var listener: OnclickListener
 
     fun addNote(note: List<Note>) {
         noteList.clear()
         noteList.addAll(note)
         notifyDataSetChanged()
 
+    }
+
+    fun setListener(onItemClick: OnclickListener) {
+        listener = onItemClick
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
@@ -36,11 +41,15 @@ class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
         return noteList.size
     }
 
-    class NoteViewHolder(private val binding: NoteItemBinding) :
+   inner class NoteViewHolder(private val binding: NoteItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun onBind(note: Note) {
             binding.tvNoteTitle.text = note.title
             binding.tvDescription.text = note.description
+
+            itemView.setOnClickListener {
+                listener.onItemClick(note)
+            }
 
             val random = Random()
             val color =
@@ -52,7 +61,10 @@ class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
         }
 
     }
+    interface OnclickListener{
 
-    //interface OnclickListener(){}
+        fun onItemClick(note: Note)
+
+    }
 
 }

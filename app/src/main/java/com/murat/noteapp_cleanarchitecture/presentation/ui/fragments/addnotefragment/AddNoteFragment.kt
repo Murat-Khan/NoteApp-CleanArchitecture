@@ -1,67 +1,104 @@
 package com.murat.noteapp_cleanarchitecture.presentation.ui.fragments.addnotefragment
 
-import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Toast
-import androidx.core.os.bundleOf
+
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import by.kirich1409.viewbindingdelegate.viewBinding
 import com.murat.noteapp_cleanarchitecture.R
-import com.murat.noteapp_cleanarchitecture.data.local.NoteDatabase
-import com.murat.noteapp_cleanarchitecture.data.model.NoteEntity
 import com.murat.noteapp_cleanarchitecture.databinding.FragmentAddNoteBinding
 import com.murat.noteapp_cleanarchitecture.domain.model.Note
+import com.murat.noteapp_cleanarchitecture.presentation.base.BaseFragment
 import com.murat.noteapp_cleanarchitecture.presentation.utils.UIState
+import com.murat.noteapp_cleanarchitecture.presentation.utils.showToast
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
-import javax.inject.Inject
+
 
 @AndroidEntryPoint
-class AddNoteFragment : Fragment() {
+class AddNoteFragment : BaseFragment(R.layout.fragment_add_note) {
 
     private val viewModel: AddNoteViewModel by viewModels()
-    private lateinit var viewBinding: FragmentAddNoteBinding
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        viewBinding = FragmentAddNoteBinding.inflate(inflater, container, false)
-        return viewBinding.root
-    }
+    private val viewBinding by viewBinding(FragmentAddNoteBinding::bind)
+    private var note: Note? = null
 
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        initClicker()
-    }
-
-    private fun initClicker() {
+    override fun initClickListeners() {
+        super.initClickListeners()
         viewBinding.btnSave.setOnClickListener {
-            setupRequests()
-            findNavController().navigateUp()
+            if (viewBinding.etNoteDesc.text.isEmpty() || viewBinding.etNoteTitle.text.isEmpty()) {
+
+                requireActivity().showToast("заполните поля")
+
+            } else {
+                createNote()
+            }
         }
     }
 
-
-
-    private fun setupRequests() {
+    private fun createNote() {
         viewModel.addNote(
             Note(
                 title = viewBinding.etNoteTitle.text.toString(),
                 description = viewBinding.etNoteDesc.text.toString()
             )
         )
+    }
+
+    override fun setupSubscribers() {
+        viewModel.addNoteState.collectUIState(
+            uiState = {
+                viewBinding.progressBar.isVisible = it is UIState.Loading
+            },
+
+            onSuccess = {
+
+                findNavController().navigateUp()
+
+            }
+        )
+
+        viewModel.editNote.collectUIState(
+            uiState = {
+                viewBinding.progressBar.isVisible = it is UIState.Loading
+            },
+
+            onSuccess = {
+                editNote()
+                findNavController().navigateUp()
+            }
+        )
 
 
     }
 
+    override fun initialize() {
+        super.initialize()
+        getData()
+    }
 
-}
+    private fun getData() {
+
+        arguments?.let {
+            val value = it.getSerializable("edit_note")
+            if (value != null) {
+                note = value as Note
+            }
+        }
+            viewBinding.etNoteDesc.setText(note?.description)
+            viewBinding.etNoteTitle.setText(note?.title)
+            viewBinding.btnSave.text = "Update"
+        }
+
+        private fun editNote() {
+
+            viewModel.editNote(
+                Note(
+                    title = viewBinding.etNoteTitle.text.toString(),
+                    description = viewBinding.etNoteDesc.text.toString()
+
+                )
+            )
+        }
+
+
+    }
