@@ -9,6 +9,7 @@ import com.murat.noteapp_cleanarchitecture.R
 import com.murat.noteapp_cleanarchitecture.databinding.FragmentAddNoteBinding
 import com.murat.noteapp_cleanarchitecture.domain.model.Note
 import com.murat.noteapp_cleanarchitecture.presentation.base.BaseFragment
+import com.murat.noteapp_cleanarchitecture.presentation.ui.fragments.notefragment.NoteFragment.Companion.EDIT_NOTE
 import com.murat.noteapp_cleanarchitecture.presentation.utils.UIState
 import com.murat.noteapp_cleanarchitecture.presentation.utils.showToast
 import dagger.hilt.android.AndroidEntryPoint
@@ -77,14 +78,17 @@ class AddNoteFragment : BaseFragment(R.layout.fragment_add_note) {
 
     private fun getData() {
         arguments?.let {
-            val value = it.getSerializable("edit_note")
+            val value = it.getSerializable(EDIT_NOTE)
             if (value != null) {
                 note = value as Note
             }
         }
         viewBinding.etNoteDesc.setText(note?.description)
         viewBinding.etNoteTitle.setText(note?.title)
-        viewBinding.btnSave.text = "Update"
+        if (note!= null){
+            viewBinding.btnSave.text = "Update"
+        }else{viewBinding.btnSave.text = "Save"}
+
     }
 
     private fun editNote() {

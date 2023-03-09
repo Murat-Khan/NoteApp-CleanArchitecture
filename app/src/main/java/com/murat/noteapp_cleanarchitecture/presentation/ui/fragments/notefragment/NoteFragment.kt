@@ -72,6 +72,22 @@ class NoteFragment : BaseFragment(R.layout.fragment_note), NoteAdapter.OnclickLi
         noteAdapter.setLongListener(this)
     }
 
+
+    override fun onItemClick(note: Note) {
+        findNavController().navigate(R.id.addNoteFragment, bundleOf(EDIT_NOTE to note))
+    }
+
+    override fun onItemLongClick(note: Note) {
+        requireActivity().showConfirmationDialog(
+            title = "Удаление",
+            message = "Вы уверены, что хотите удалитьзаметку?",
+            positiveButtonText = "Удалить",
+            negativeButtonText = "Отмена",
+            onPositiveAction = { viewModel.removeNote(note) },
+            onNegativeAction = { requireActivity()}
+        )
+    }
+
     private fun setupRecyclerView() {
         viewBinding.recyclerView.apply {
             layoutManager = StaggeredGridLayoutManager(
@@ -82,20 +98,8 @@ class NoteFragment : BaseFragment(R.layout.fragment_note), NoteAdapter.OnclickLi
             adapter = noteAdapter
         }
     }
-
-    override fun onItemClick(note: Note) {
-        findNavController().navigate(R.id.addNoteFragment, bundleOf("edit_note" to note))
+    companion object{
+        const val EDIT_NOTE = "edit_note"
     }
 
-
-    override fun onItemLongClick(note: Note) {
-        requireActivity().showConfirmationDialog(
-            title = "Удаление",
-            message = "Вы уверены, что хотите удалитьзаметку?",
-            positiveButtonText = "Удалить",
-            negativeButtonText = "Отмена",
-            onPositiveAction = { viewModel.removeNote(note) },
-            onNegativeAction = { }
-        )
-    }
 }
